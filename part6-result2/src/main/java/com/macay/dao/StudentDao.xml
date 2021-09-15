@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.macay.dao.StudentDao">
+    <!--基础隐射-->
+    <resultMap id="studentBasicMap" type="com.macay.entity.Student">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+    </resultMap>
+    <!--
+     联合查询，使用级联属性封装结果集
+    -->
+    <resultMap id="studentMap" type="com.macay.entity.Student">
+        <!--主键类型使用id标签-->
+        <id column="id" property="id"/>
+
+        <!--非主键类型使用result标签-->
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+        <!-- 级联属性
+           cla: student对象的对象属性，大小写保持一致
+        -->
+        <result column="cid" property="cla.id"/>
+        <result column="cname" property="cla.name"/>
+    </resultMap>
+
+<!--    &lt;!&ndash;使用继承的形式&ndash;&gt;-->
+<!--    <resultMap id="studentMap" extends="studentBasicMap" type="com.macay.entity.Student">-->
+<!--        <result column="cid" property="cla.id"/>-->
+<!--        <result column="cname" property="cla.name"/>-->
+<!--    </resultMap>-->
+
+    <!--
+       使用association指定联合的javabean对象，封装结果
+    -->
+    <resultMap id="studentMap2" type="com.macay.entity.Student">
+        <id column="id" property="id"/>
+
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+        <!-- association可以指定联合的javabean对象
+            property="cla"： 指定那个属性是联合的对象
+            javaType：指定这个属性对象的类型（不能省略）
+        -->
+        <association property="cla" javaType="com.macay.entity.Classess">
+            <!--
+            column：数据库字段
+            property：关联对象的属性
+            -->
+            <id column="cid" property="id"/>
+            <result column="cname" property="name"/>
+        </association>
+    </resultMap>
+
+    <select id="selectStudentById" resultMap="studentMap">
+        select s.id, s.name, s.email, s.age, c.id cid, c.name cname from student s, classes c where s.cid = c.id and
+        s.id = #{id}
+    </select>
+
+    <select id="selectStudentById2" resultMap="studentMap">
+        select s.id, s.name, s.email, s.age, c.id cid, c.name cname from student s, classes c where s.cid = c.id and
+        s.id = #{id}
+    </select>
+
+    <!-- 使用association分步查询：
+      1、先按照学生ID查询学生信息。
+      2、根据查询学生信息中的cid去班级表查询班级信息。
+      3、把查出的班级设置到学生信息中。
+    -->
+    <resultMap id="studentMapByStep" type="com.macay.entity.Student">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+        <!--association定义关联对象的封装规则
+          select:表示cla这属性对象是通过调用select里面的这个方法查询得到的。
+          column:表示指定将哪一列的值传给上面这个方法。
+
+          流程：使用select指定的方法（传入column指定的这列参数的值）查出对象，并指定给property指定的属性。
+        -->
+        <association property="cla" select="com.macay.dao.ClassessDao.selectById" column="cid">
+        </association>
+    </resultMap>
+    <select id="selectStudentByStep" resultMap="studentMapByStep">
+        select * from student where id = #{id}
+    </select>
+
+    <resultMap id="studentMapE" extends="studentBasicMap" type="com.macay.entity.Student">
+        <association property="cla" resultMap="com.macay.dao.ClassessDao.classBasicMap"></association>
+    </resultMap>
+
+    <select id="selectStudentById3" resultMap="studentMapE">
+        select s.id, s.name, s.email, s.age, c.id cid, c.name cname from student s, classes c where s.cid = c.id and
+        s.id = #{id}
+    </select>
+</mapper>
