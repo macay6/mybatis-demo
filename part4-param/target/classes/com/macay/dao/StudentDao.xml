@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.macay.dao.StudentDao">
+    <select id="selectStudentById"  resultType="com.macay.entity.Student">
+        select id, name, email, age from student where id = #{id}
+    </select>
+
+    <!--接口的方法形参是一个简单类型的-->
+    <select id="selectByEmail"  resultType="com.macay.entity.Student">
+        select id, name, email, age from student where email = #{studentemail}
+    </select>
+    <!-- 多个简单类型的参数.
+         当使用了@Param命名后，例如@Param("myname").
+         在mapper中，使用#{命名的参数}， 例如 #{myname}
+         -->
+    <select id="selectByNameOrAge" resultType="com.macay.entity.Student">
+        select id, name, email, age from student where name = #{myName} or age = #{myAge}
+    </select>
+
+    <!--
+       一个java对象作为方法的参数，使用对象的属性作为参数值使用
+       简单的语法： #{属性名} ， mybatis调用此属性的getXXX()方法获取属性值
+    -->
+    <select id="selectByObject" resultType="com.macay.entity.Student">
+        select id, name, email, age from student where name = #{name} or age = #{age}
+    </select>
+
+
+    <!--
+      mybatis版本是 3.5.1
+      使用位置获取参数值， dao接口方法是多个简单类型的参数
+      语法： #{arg0}, #{arg1}....
+     -->
+    <select id="selectByPosition" resultType="com.macay.entity.Student">
+        select id, name, email, age from student where name = #{arg0} or age = #{arg1}
+    </select>
+
+    <!--
+       使用Map传递参数，
+       在mapper文件中，获取map的值，是通过key获取的，语法：#{key}
+    -->
+    <select id="selectByMap" resultType="com.macay.entity.Student">
+       select id, name, email, age from student where name = #{myName} or age = #{myAge}
+    </select>
+
+    <!--
+   使用Map传递参数，
+   在mapper文件中，获取map的值，是通过key获取的，语法：#{key}
+-->
+    <select id="selectStudentOrderByColumn" resultType="com.macay.entity.Student">
+       select id, name, email, age from ${tableName} where name = #{name} order by ${column}
+    </select>
+
+
+</mapper>
