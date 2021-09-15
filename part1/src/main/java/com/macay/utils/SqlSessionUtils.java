@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @ClassName: SqlSessionUtils 帮助类
+ * @ClassName: SqlSessionUtils 帮助类获取sqlsession对象
  * @Description:
  * @Author: Macay
  * @Date: 2021/5/3 12:40 下午
