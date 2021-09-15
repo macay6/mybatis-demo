@@ -47,7 +47,7 @@
 　　　　<value>${jdbc_username_gx}</value>  
 　　</property>  
 　　<property name="password">  
-　　　　<value>${jdbc_password_gx}</value>  
+　　　　<value>${jdbc_password_gx}</value>  git
 　　</property> 
 </bean>
 ```
