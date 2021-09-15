@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.macay.dao.NewStudentDao">
+    <!--别名形式-->
+    <select id="selectById" resultType="com.macay.entity.NewStudent">
+       select id sid, name sName, email, age from student where id = #{id}
+    </select>
+
+    <!--定义resultMap
+        id:给resultMap的映射关系起个名称，唯一标识
+        type：映射的pojo对象，java类型的全限定名称
+    -->
+    <resultMap id="newStuMap" type="com.macay.entity.NewStudent">
+        <!--定义列名和属性名的对应-->
+        <!--column的值为数据库字段，property的值为对象的属性-->
+        <!--主键类型使用id标签-->
+        <id column="id" property="sid" />
+
+        <!--非主键类型使用result标签-->
+        <result column="name" property="sName"/>
+
+        <!--列名和属性名相同可以不用定义，但一般建议只要使用了resultMap,所有属性都加上-->
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+    </resultMap>
+
+    <!--使用resultMap属性，指定映射关系的id
+        resultMap和resultType 不能同时使用， 二选一。
+    -->
+    <select id="selectById2" resultMap="newStuMap">
+        select id, name, email, age from student where id = #{id}
+    </select>
+</mapper>
