@@ -4,20 +4,24 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.macay.dao.StudentDao">
+
+    <select id="selectById" resultType="com.macay.entity.Student">
+        select id, name, email, age from student where id = #{id}
+    </select>
     <select id="selectStudentIfInWhere" resultType="com.macay.entity.Student">
         select * from student where 1 = 1
-         /*
-         test: 使用对象的属性值作为条件，建议只用true或false作为结果
-         */
-         <if test="name != null and name != ''">
-             and name like CONCAT('%',#{name},'%')
-         </if>
-         <if test="email != null and email != ''">
-             and email = #{email}
-         </if>
+        /*
+        test: 使用对象的属性值作为条件，建议只用true或false作为结果
+        */
+        <if test="name != null and name != ''">
+            and name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="email != null and email != ''">
+            and email = #{email}
+        </if>
     </select>
 
-    <update id="updateStudentByIdSelective" >
+    <update id="updateStudentByIdSelective">
         update student
         <set>
             <if test="name != null and name != ''">
@@ -34,7 +38,7 @@
         where id = #{id}
     </update>
 
-    <insert id="insertStudent" >
+    <insert id="insertStudent">
         insert into student (
         id, name,
         <if test="email != null and email != ''">
@@ -49,4 +53,92 @@
         #{age}
         )
     </insert>
+
+    <select id="selectByIdOrName" resultType="com.macay.entity.Student">
+        select id, name, email, age
+        from student
+        where 1 = 1
+        <choose>
+            <when test="id != null">
+                and id = #{id}
+            </when>
+            <when test="name != null and name != ''">
+                and name = #{name}
+            </when>
+            <otherwise>
+                and 1 = 2
+            </otherwise>
+        </choose>
+    </select>
+
+
+    <select id="selectByIdOrName2" resultType="com.macay.entity.Student">
+        select id, name, email, age
+        from student
+        <where>
+            <choose>
+                <when test="id != null">
+                    and id = #{id}
+                </when>
+                <when test="name != null and name != ''">
+                    and name = #{name}
+                </when>
+                <otherwise>
+                    and 1 = 2
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectStudentLikeName" resultType="com.macay.entity.Student">
+        <bind name="userName" value="'%' + name + '%'"/>
+        select * from student where name like #{userName}
+    </select>
+
+    <select id="selectByIdList" resultType="com.macay.entity.Student">
+        select id, name, email, age from student
+        <if test="list !=null and list.size > 0">
+            where id in
+            <foreach collection="list" item="ids" open="(" close=")" separator=",">
+                #{ids}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectByIdList2" resultType="com.macay.entity.Student">
+        select id, name, email, age from student
+        <if test="list !=null and list.size > 0">
+            where id in
+            <foreach collection="list" item="stu" open="(" close=")" separator=",">
+                #{stu.id}
+            </foreach>
+        </if>
+    </select>
+
+
+    <select id="selectByIdArray" resultType="com.macay.entity.Student">
+        select id, name, email, age from student
+        <if test="array !=null">
+            where id in
+            <foreach collection="array" item="ids" open="(" close=")" separator=",">
+                #{ids}
+            </foreach>
+        </if>
+    </select>
+
+    <insert id="insertStudentBatch">
+        insert into student (id, name, email, age)
+        values
+        <foreach collection="list" separator="," item="stu">
+            (#{stu.id}, #{stu.name}, #{stu.email}, #{stu.age})
+        </foreach>
+    </insert>
+
+    <update id="updateStudentByMap" >
+        update student set
+        <foreach collection="_parameter" item="val" index="key" separator=",">
+            ${key} = #{val}
+        </foreach>
+        where id = #{id}
+    </update>
 </mapper>

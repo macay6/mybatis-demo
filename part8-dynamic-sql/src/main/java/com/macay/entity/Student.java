@@ -1,6 +1,5 @@
 package com.macay.entity;
 
-import com.sun.tools.internal.jxc.gen.config.Classes;
 
 /**
  * @ClassName: Student
