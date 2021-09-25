@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.macay.dao.ClassessDao">
+    <select id="selectById" resultType="com.macay.entity.Classess">
+       select id, name from classes where id = #{id}
+    </select>
+
+    <resultMap id="classMap" type="com.macay.entity.Classess">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <!--collection定义集合类型的属性的封装规则
+           ofType：指定集合里面元素的类型
+        -->
+        <collection property="students" ofType="com.macay.entity.Student">
+            <!--定义集合中元素的封装规则-->
+            <id column="sid" property="id"/>
+            <result column="sname" property="name"/>
+            <result column="semail" property="email"/>
+            <result column="sage" property="age"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectClassWithStudentById" resultMap="classMap">
+       select c.id, c.name, s.id sid,s.name sname, s.age sage, s.email semail from classes c left join student s on
+     c.id = s.cid where c.id = #{id}
+    </select>
+
+    <select id="selectAllClassWithStudent" resultMap="classMap" >
+        select c.id, c.name, s.id sid,s.name sname, s.age sage, s.email semail from classes c left join student s on
+     c.id = s.cid order by c.id
+    </select>
+
+    <resultMap id="classMapStep" type="com.macay.entity.Classess">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <!--collection定义关联对象的封装规则
+          select:表示cla这属性对象是通过调用select里面的这个方法查询得到的。
+          column:表示将主查询中某列的值传给嵌套查询这个方法作为参数。
+          流程：使用select指定的方法（传入column指定的这列参数的值）查出对象，并指定给property指定的属性。
+        -->
+        <collection property="students" select="com.macay.dao.StudentDao.selectStudentByCid" column="id">
+        </collection>
+    </resultMap>
+
+    <select id="selectClassWithStudentByStep" resultMap="classMapStep" >
+        select id, name from classes where id = #{id}
+    </select>
+</mapper>

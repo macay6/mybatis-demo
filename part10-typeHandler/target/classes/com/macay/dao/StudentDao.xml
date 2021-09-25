@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.macay.dao.StudentDao">
+
+    <!--    也可以使用typeHandler来指定-->
+    <!--    <insert id="insertStudent">-->
+    <!--        insert into student (id, name, email, age, party_member)-->
+    <!--        values (#{id},#{name},#{email},#{age},#{partyMember, typeHandler=com.macay.handler.BooleanCharTypeHandler})-->
+    <!--    </insert>-->
+
+    <insert id="insertStudent">
+        insert into student (id, name, email, age, party_member,hobbies,cla,gender)
+        values (#{id},#{name},#{email},#{age},#{partyMember, jdbcType=CHAR, javaType=Boolean},
+        #{hobbies, typeHandler=com.macay.handler.ListStringTypeHandler},
+        #{cla, typeHandler=com.macay.handler.JavabeenJsonTypeHandler},
+        #{gender, typeHandler=com.macay.handler.MenuIntTypeHandler})
+    </insert>
+
+    <resultMap id="studentMap" type="com.macay.entity.Student">
+        <!--主键类型使用id标签-->
+        <id column="id" property="id" />
+        <!--非主键类型使用result标签-->
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+        <result column="party_member" property="partyMember"
+                typeHandler="com.macay.handler.BooleanCharTypeHandler"></result>
+        <result column="hobbies" property="hobbies"
+                typeHandler="com.macay.handler.ListStringTypeHandler"></result>
+        <result column="cla" property="cla"
+                typeHandler="com.macay.handler.JavabeenJsonTypeHandler"></result>
+        <result column="gender" property="gender"
+                typeHandler="com.macay.handler.MenuIntTypeHandler"/>
+    </resultMap>
+
+    <select id="getStudnetById" resultMap="studentMap">
+        select * from student where id = #{id}
+    </select>
+
+    <!--    <resultMap id="studentMap" type="com.macay.entity.Student">-->
+    <!--        &lt;!&ndash;主键类型使用id标签&ndash;&gt;-->
+    <!--        <id column="id" property="id" />-->
+    <!--        &lt;!&ndash;非主键类型使用result标签&ndash;&gt;-->
+    <!--        <result column="name" property="name"/>-->
+    <!--        <result column="email" property="email"/>-->
+    <!--        <result column="age" property="age"/>-->
+    <!--        <result column="party_member" property="partyMember" javaType="boolean" jdbcType="NUMERIC"/>-->
+    <!--    </resultMap>-->
+
+    <!--    <select id="getStudnetById" resultType="com.macay.entity.Student">-->
+    <!--        select * from student where id = #{id}-->
+    <!--    </select>-->
+
+
+</mapper>
