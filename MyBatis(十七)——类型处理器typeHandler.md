@@ -227,7 +227,7 @@ public class BooleanCharTypeHandler extends BaseTypeHandler {
 
 上面这两种配置的作用域是全局的，也就是说所有的我们书写的Mapper中凡是满足Java类型是Boolean数据库类型是Number或者是int时（满足这个条件 javaType=“Boolean” jdbcType=“NUMERIC” ），都会执行这个TypeHandler。
 
-这个需要我们在resultMap中手动定义javaType和jdbcType，如下，否则即使定义了全局注册，仍然不会生效。
+这个需要我们在查询resultMap中和插入Insert中手动定义javaType和jdbcType，如下，否则即使定义了全局注册，仍然不会生效。
 
 ```xml
     <resultMap id="studentMap" type="com.macay.entity.Student">
@@ -242,7 +242,7 @@ public class BooleanCharTypeHandler extends BaseTypeHandler {
 ```
 
 ###### 2、局部注册
-在对应的Mapper文件中添加resultMap标签：
+对于查询，需要我们在对应的Mapper文件中添加resultMap标签：
 
 ```xml
 <resultMap id="studentMap" type="com.macay.entity.Student">
@@ -257,6 +257,32 @@ public class BooleanCharTypeHandler extends BaseTypeHandler {
 </resultMap>
 ```
 如图，我们可以直接在mapper要用到的地方声明需要使用的类型转换器，仅在resultMap里指定属性装配,不在mybatis的配置文件中装配,就可以仅对此属性生效。
+
+但是这种方式有一个缺点那就是只适用于查询操作，即在查询的过程中系统会启用我们自定义的typeHandler，会将boolean转为int对象，但是在插入的时候却不会启用我们自定义的typeHandler，想要在插入的时候启用自定义的typeHandler，需要我们在insert节点中简单配置一下，如下：
+
+```xml
+<insert id="insertStudent">
+    insert into student (id, name, email, age, party_member)
+    values (#{id},#{name},#{email},#{age},#{partyMember, jdbcType=CHAR, javaType=Boole, typeHandler=com.macay.handler.BooleanIntTypeHandler})
+</insert>
+```
+也可以只配置javaType和jdbcType，如下：
+```xml
+<insert id="insertStudent">
+    insert into student (id, name, email, age, party_member)
+    values (#{id},#{name},#{email},#{age},#{partyMember, jdbcType=CHAR, javaType=Boolean})
+</insert>
+```
+或者只配置typeHandler：
+
+```xml
+<insert id="insertStudent">
+    insert into student (id, name, email, age, party_member)
+    values (#{id},#{name},#{email},#{age},#{partyMember, typeHandler=com.macay.handler.BooleanIntTypeHandler})
+</insert>
+```
+这三种效果都是一样的。
+
 #### 四、自定义类型转换器的常见使用场景
 ##### 1、boolean与int
 比如：Java实体类中有一个Boolean类型的字段flag，对应到数据库flag字段中类型是int。
@@ -857,3 +883,118 @@ public void testGetStudentById() {
 结果如下：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/862f543012bd423a8ef952c62a162c34.png)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/e31cc4abbe4e4d9e9dd2bfbaa63a3604.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBATWFjYXk=,size_20,color_FFFFFF,t_70,g_se,x_16)
+##### 6、日期类处理
+场景：比如student中有一个Date数据类型，我想将之存到数据库的时候存成一个1970年至今的毫秒数。
+
+java类：
+
+```java
+public class Student {
+    private Integer id;
+    private String name;
+    private String email;
+    private Integer age;
+    private Boolean partyMember;
+    private Classess cla;
+    private List<Integer> hobbies;
+    private GenderEnum gender;
+    private Date regDate;
+```
+typeHandler处理类：
+
+```java
+public class DateVarCharTypeHandler extends BaseTypeHandler<Date> {
+    @Override
+    public void setNonNullParameter(PreparedStatement preparedStatement, int i, Date date, JdbcType jdbcType) throws SQLException {
+      preparedStatement.setString(i, String.valueOf(date.getTime()));
+    }
+
+    @Override
+    public Date getNullableResult(ResultSet resultSet, String s) throws SQLException {
+        return new Date(resultSet.getLong(s));
+    }
+
+    @Override
+    public Date getNullableResult(ResultSet resultSet, int i) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public Date getNullableResult(CallableStatement callableStatement, int i) throws SQLException {
+        return null;
+    }
+}
+
+```
+mapper文件：
+
+```xml
+<insert id="insertStudent">
+    insert into student (id, name, email, age, party_member,hobbies,cla,gender, regDate)
+    values (#{id},#{name},#{email},#{age},#{partyMember, jdbcType=CHAR, javaType=Boolean},
+    #{hobbies, typeHandler=com.macay.handler.ListStringTypeHandler},
+    #{cla, typeHandler=com.macay.handler.JavabeenJsonTypeHandler},
+    #{gender, typeHandler=com.macay.handler.MenuIntTypeHandler},
+    #{regDate, typeHandler=com.macay.handler.DateVarCharTypeHandler})
+</insert>
+<resultMap id="studentMap" type="com.macay.entity.Student">
+    <!--主键类型使用id标签-->
+    <id column="id" property="id" />
+    <!--非主键类型使用result标签-->
+    <result column="name" property="name"/>
+    <result column="email" property="email"/>
+    <result column="age" property="age"/>
+    <result column="party_member" property="partyMember"
+            typeHandler="com.macay.handler.BooleanCharTypeHandler"></result>
+    <result column="hobbies" property="hobbies"
+            typeHandler="com.macay.handler.ListStringTypeHandler"></result>
+    <result column="cla" property="cla"
+            typeHandler="com.macay.handler.JavabeenJsonTypeHandler"></result>
+    <result column="gender" property="gender"
+            typeHandler="com.macay.handler.MenuIntTypeHandler"/>
+    <result column="regDate" property="regDate"
+            typeHandler="com.macay.handler.DateVarCharTypeHandler"/>
+</resultMap>
+<select id="getStudnetById" resultMap="studentMap">
+    select * from student where id = #{id}
+</select>
+```
+测试类：
+
+```java
+@Test
+public void testInsertStudent() {
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    StudentDao mapper = sqlSession.getMapper(StudentDao.class);
+    Student student = new Student();
+    student.setId(38);
+    student.setName("test30");
+    student.setEmail("123@qq.com");
+    student.setAge(30);
+    student.setPartyMember(true);
+    List<Integer> list = Arrays.asList(new Integer[]{1, 2, 3, 4});
+    Classess classess = new Classess();
+    classess.setId(2);
+    classess.setName("sannianyuban");
+    student.setCla(classess);
+    student.setHobbies(list);
+    student.setGender(GenderEnum.MALE);
+    student.setRegDate(new Date());
+    int i = mapper.insertStudent(student);
+    System.out.println(i);
+    sqlSession.commit();
+    sqlSession.close();
+}
+@Test
+public void testGetStudentById() {
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    StudentDao mapper = sqlSession.getMapper(StudentDao.class);
+    Student student = mapper.getStudnetById(38);
+    System.out.println(student);
+    sqlSession.commit();
+    sqlSession.close();
+}
+```
+效果如下：
+![在这里插入图片描述](https://img-blog.csdnimg.cn/654f11a62ff944f7abf4d03171d68d93.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/b64e1b5cd6fb423684460c5d01662782.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBATWFjYXk=,size_20,color_FFFFFF,t_70,g_se,x_16)
