@@ -12,11 +12,12 @@
     <!--    </insert>-->
 
     <insert id="insertStudent">
-        insert into student (id, name, email, age, party_member,hobbies,cla,gender)
+        insert into student (id, name, email, age, party_member,hobbies,cla,gender, regDate)
         values (#{id},#{name},#{email},#{age},#{partyMember, jdbcType=CHAR, javaType=Boolean},
         #{hobbies, typeHandler=com.macay.handler.ListStringTypeHandler},
         #{cla, typeHandler=com.macay.handler.JavabeenJsonTypeHandler},
-        #{gender, typeHandler=com.macay.handler.MenuIntTypeHandler})
+        #{gender, typeHandler=com.macay.handler.MenuIntTypeHandler},
+        #{regDate, typeHandler=com.macay.handler.DateVarCharTypeHandler})
     </insert>
 
     <resultMap id="studentMap" type="com.macay.entity.Student">
@@ -34,6 +35,8 @@
                 typeHandler="com.macay.handler.JavabeenJsonTypeHandler"></result>
         <result column="gender" property="gender"
                 typeHandler="com.macay.handler.MenuIntTypeHandler"/>
+        <result column="regDate" property="regDate"
+                typeHandler="com.macay.handler.DateVarCharTypeHandler"/>
     </resultMap>
 
     <select id="getStudnetById" resultMap="studentMap">

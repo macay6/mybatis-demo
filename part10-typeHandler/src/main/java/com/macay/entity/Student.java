@@ -1,6 +1,7 @@
 package com.macay.entity;
 
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,6 +19,16 @@ public class Student {
     private Classess cla;
     private List<Integer> hobbies;
     private GenderEnum gender;
+    private Date regDate;
+
+
+    public Date getRegDate() {
+        return regDate;
+    }
+
+    public void setRegDate(Date regDate) {
+        this.regDate = regDate;
+    }
 
     public GenderEnum getGender() {
         return gender;
@@ -94,6 +105,7 @@ public class Student {
                 ", cla=" + cla +
                 ", hobbies=" + hobbies +
                 ", gender=" + gender +
+                ", regDate=" + regDate +
                 '}';
     }
 }

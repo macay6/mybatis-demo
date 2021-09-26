@@ -35,7 +35,7 @@ public class MyTest {
         SqlSession sqlSession = SqlSessionUtils.getSqlSession();
         StudentDao mapper = sqlSession.getMapper(StudentDao.class);
         Student student = new Student();
-        student.setId(37);
+        student.setId(38);
         student.setName("test30");
         student.setEmail("123@qq.com");
         student.setAge(30);
@@ -47,6 +47,7 @@ public class MyTest {
         student.setCla(classess);
         student.setHobbies(list);
         student.setGender(GenderEnum.MALE);
+        student.setRegDate(new Date());
         int i = mapper.insertStudent(student);
         System.out.println(i);
         sqlSession.commit();
@@ -57,7 +58,7 @@ public class MyTest {
     public void testGetStudentById() {
         SqlSession sqlSession = SqlSessionUtils.getSqlSession();
         StudentDao mapper = sqlSession.getMapper(StudentDao.class);
-        Student student = mapper.getStudnetById(37);
+        Student student = mapper.getStudnetById(38);
         System.out.println(student);
         sqlSession.commit();
         sqlSession.close();
